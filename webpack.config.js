@@ -1,5 +1,8 @@
-var path = require('path')
-var webpack = require('webpack')
+const path = require('path')
+const webpack = require('webpack')
+
+const __PROD__ = process.env.NODE_ENV === 'production'
+
 module.exports = {
   context: path.join(__dirname, 'src'),
   entry: './main.js',
@@ -19,11 +22,25 @@ module.exports = {
       {
         test: /\.css$/,
         loaders: [
-          'style-loader?sourceMap',
-          'css-loader?modules&importLoaders=1&localIdentName=[path]___[name]__[local]___[hash:base64:5]'
+          {
+            loader: 'style-loader',
+            options: {
+              sourceMap: !__PROD__
+            }
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: true,
+              modules: true,
+              minimize: __PROD__,
+              localIdentName: '[path]___[name]__[local]___[hash:base64:5]'
+            }
+          }
         ]
       },
-      { test: /\.jpe?g$|\.svg$|\.png$/,
+      { 
+        test: /\.jpe?g$|\.svg$|\.png$/,
         exclude: /node_modules/,
         loader: 'file-loader?name=[path][name].[ext]'
       }
@@ -33,7 +50,19 @@ module.exports = {
     new webpack.EnvironmentPlugin([
       'NODE_ENV'
     ])
-  ],
+  ]
+  .concat(__PROD__ ? [
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        screw_ie8: true,
+        warnings: false
+      }
+    }),
+    new webpack.LoaderOptionsPlugin({
+      minimize: true,
+      debug: false
+    })
+  ] : []),
   devServer: {
     historyApiFallback: true
   }
