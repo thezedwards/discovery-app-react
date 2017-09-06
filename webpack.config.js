@@ -1,5 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 
 const __PROD__ = process.env.NODE_ENV === 'production'
 
@@ -49,7 +50,18 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin([
       'NODE_ENV'
-    ])
+    ]),
+    new LodashModuleReplacementPlugin({
+      // contentful.js
+      caching: true,
+      cloning: true,
+      memoizing: true,
+      // lodash.curry alias
+      currying: true,
+      // react-css-modules
+      shorthands: true,
+      collections: true
+    })
   ]
   .concat(__PROD__ ? [
     new webpack.optimize.UglifyJsPlugin({
@@ -63,6 +75,12 @@ module.exports = {
       debug: false
     })
   ] : []),
+  resolve: {
+    alias: {
+      'lodash-es': 'lodash',
+      'lodash.curry': 'lodash/curry'
+    }
+  },
   devServer: {
     historyApiFallback: true
   }
