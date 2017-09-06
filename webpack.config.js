@@ -61,6 +61,17 @@ module.exports = {
       // react-css-modules
       shorthands: true,
       collections: true
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: ({ resource }) => (
+        resource !== undefined &&
+        resource.indexOf('node_modules') !== -1
+      )
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'manifest',
+      minChunks: Infinity
     })
   ]
   .concat(__PROD__ ? [
